@@ -1,3 +1,12 @@
+/*
+	mcards.c is a card counting program that's been 
+	refactored into 3 functions instead of one main
+	that does all the work.
+
+	I worked with Charlene on this assignment.
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 
