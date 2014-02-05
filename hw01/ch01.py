@@ -6,6 +6,9 @@ This modified version requires pandas, numpy, and matplotlib.
 If you use apt:
 
 sudo apt-get install python-pandas python-numpy python-matplotlib
+
+NOTE FROM AIDAN: I got help from Evan on adding the derivative to
+the controller.
 """
 
 import numpy
