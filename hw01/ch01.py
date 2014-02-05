@@ -45,14 +45,16 @@ class Buffer:
         return self.queued
 
 class Controller:
-    def __init__( self, kp, ki ):
+    def __init__( self, kp, ki, kd ):
         """Initializes the controller.
 
         kp: proportional gain
         ki: integral gain
+
         """
-        self.kp, self.ki = kp, ki
+        self.kp, self.ki, self.kd = kp, ki, kd
         self.i = 0       # Cumulative error ("integral")
+        self.preve = 0
 
     def work( self, e ):
         """Computes the number of jobs to be added to the ready queue.
@@ -62,8 +64,11 @@ class Controller:
         returns: float number of jobs
         """
         self.i += e
+        deriv = e - self.preve
 
-        return self.kp*e + self.ki*self.i
+        # tempReturn = self.kp*e + self.ki*self.i + kd*deriv
+        self.preve = e
+        return self.kp*e + self.ki*self.i + self.kd*deriv
 
 # ============================================================
 
@@ -84,7 +89,8 @@ def closed_loop( c, p, tm=5000 ):
     y = 0
     res = []
     for t in range( tm ):
-        r = setpoint(t)
+        # r = setpoint(t)
+        r = t
         e = r - y
         u = c.work(e)
         y = p.work(u)
@@ -96,7 +102,7 @@ def closed_loop( c, p, tm=5000 ):
 
 # ============================================================
 
-c = Controller( 1.25, 0.01 )
+c = Controller( 1.25, 0.01, 0.01)  # added kd input
 p = Buffer( 50, 10 )
 
 # run the simulation
@@ -113,6 +119,3 @@ pyplot.plot(ts, rs, color='green', label='target')
 pyplot.plot(ts, ys, color='red', label='queue length')
 pyplot.plot(ts, ys_smooth, color='blue', label='trend')
 pyplot.show()
-
-
-
