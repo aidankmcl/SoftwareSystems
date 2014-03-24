@@ -116,9 +116,10 @@ int hash_string(void *p)
     int i = 0;
 
     while (s[i] != 0) {
-	total += s[i];
-	i++;
+    	total += s[i];
+    	i++;
     }
+
     return total;
 }
 
@@ -134,22 +135,36 @@ int hash_hashable(Hashable *hashable)
 int equal_int (void *ip, void *jp)
 {
     // FIX ME!
+    int i = hash_int(ip);
+    int j = hash_int(jp);
+
+    if (i == j) {
+        return 1;
+    }
+
     return 0;
 }
 
 
 /* Compares strings. */
-int equal_string (void *s1, void *s2)
-{
-    // FIX ME!
-    return 0;
+int equal_string (void *s1, void *s2) {
+    // FIX ME!!
+
+    if (!strcmp(s1,s2)) {
+        return 1;
+    } else {
+        return 0;    
+    }
 }
 
 
 /* Compares Hashables. */
-int equal_hashable(Hashable *h1, Hashable *h2)
-{
+int equal_hashable(Hashable *h1, Hashable *h2) {
+    
     // FIX ME!
+    if (h1->hash == h2->hash) {
+        return 1;
+    }
     return 0;
 }
 
@@ -190,7 +205,17 @@ typedef struct node {
 Node *make_node(Hashable *key, Value *value, Node *next)
 {
     // FIX ME!
-    return NULL;
+    Node *node = malloc(sizeof(Node));
+    if (node == NULL) {
+        fprintf(stderr, "Malloc failed\n");
+        exit(1);
+    }
+
+    node->key = key;
+    node->value = value;
+    node->next = next;
+    
+    return node;
 }
 
 
@@ -207,6 +232,12 @@ void print_node(Node *node)
 void print_list(Node *node)
 {
     // FIX ME!
+    printf("Printing List\n");
+    print_node(node);
+    while (node->next != NULL) {          //Sketchy, not sure
+        node = node->next;
+        print_node(node);
+    }
 }
 
 
@@ -214,16 +245,28 @@ void print_list(Node *node)
 
 This is actually a synonym for make_node.
  */
-Node *prepend(Hashable *key, Value *value, Node *rest)
+Node *prepend(Hashable *key, Value *value, Node *rest) 
 {
     return make_node(key, value, rest);
 }
 
 
 /* Looks up a key and returns the corresponding value, or NULL */
-Value *list_lookup(Node *list, Hashable *key)
+Value *list_lookup(Node *list, Hashable *key) 
 {
     // FIX ME!
+    if (equal_string(list->key, key)) {
+        return list->value;
+    }
+
+    while (list->next != NULL) {
+        if (equal_hashable(list->key, key)) {
+            return list->value;
+        } else {
+            list = list->next;
+        }
+    }
+    
     return NULL;
 }
 
@@ -240,7 +283,20 @@ typedef struct map {
 Map *make_map(int n)
 {
     // FIX ME!
-    return NULL;
+    Map *map = malloc(sizeof(Map));
+    if (map == NULL) {
+        fprintf(stderr, "Malloc failed\n");   // lists?
+        exit(1);
+    }
+
+    map->n = n;
+    map->lists = (Node **) malloc(sizeof(Node **));
+    if (map->lists == NULL) {
+        fprintf(stderr, "Malloc failed\n");   // lists?
+        exit(1);
+    }
+
+    return map;
 }
 
 
@@ -253,7 +309,7 @@ void print_map(Map *map)
 	if (map->lists[i] != NULL) {
 	    printf ("%d\n", i);
 	    print_list (map->lists[i]);
-	}
+	   }
     }
 }
 
@@ -262,6 +318,17 @@ void print_map(Map *map)
 void map_add(Map *map, Hashable *key, Value *value)
 {
     // FIX ME!
+    int i;
+    Node *add = make_node(key, value, NULL);
+
+    for (i=0;i< map->n;i++) {
+        if (map->lists[i] != NULL) {
+            continue;
+        } else {
+            map->lists[i] = add;
+            break;
+        }
+    }
 }
 
 
@@ -269,6 +336,16 @@ void map_add(Map *map, Hashable *key, Value *value)
 Value *map_lookup(Map *map, Hashable *key)
 {
     // FIX ME!
+    int i;
+
+    for (i=0; i<map->n ;i++) {
+        if (map->lists[i] != NULL) {
+            if (map->lists[i]->key == key) {
+                return map->lists[i]->value;
+            }
+        }
+    }
+
     return NULL;
 }
 
@@ -315,7 +392,7 @@ int main ()
     printf ("Map\n");
     print_map(map);
 
-    // run some test lookups
+    // // run some test lookups
     value = map_lookup(map, hashable1);
     print_lookup(value);
 
