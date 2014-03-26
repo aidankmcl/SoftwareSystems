@@ -245,6 +245,7 @@ void print_list(Node *node)
 
 This is actually a synonym for make_node.
  */
+
 Node *prepend(Hashable *key, Value *value, Node *rest) 
 {
     return make_node(key, value, rest);
@@ -318,17 +319,8 @@ void print_map(Map *map)
 void map_add(Map *map, Hashable *key, Value *value)
 {
     // FIX ME!
-    int i;
-    Node *add = make_node(key, value, NULL);
-
-    for (i=0;i< map->n;i++) {
-        if (map->lists[i] != NULL) {
-            continue;
-        } else {
-            map->lists[i] = add;
-            break;
-        }
-    }
+    int index = hash_hashable(key) % map->n;
+    map->lists[index] = prepend(key, value, NULL);
 }
 
 
@@ -336,17 +328,11 @@ void map_add(Map *map, Hashable *key, Value *value)
 Value *map_lookup(Map *map, Hashable *key)
 {
     // FIX ME!
-    int i;
+    int index = hash_hashable(key) % map->n;
+    Node* req = map->lists[index];
+    Value* val = req->value;
 
-    for (i=0; i<map->n ;i++) {
-        if (map->lists[i] != NULL) {
-            if (map->lists[i]->key == key) {
-                return map->lists[i]->value;
-            }
-        }
-    }
-
-    return NULL;
+    return req->value;
 }
 
 
